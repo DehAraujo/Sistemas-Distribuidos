@@ -1,23 +1,30 @@
-// bot-node/bot.js
 const zmq = require("zeromq");
-const sock = new zmq.Request();
-const { v4: uuidv4 } = require("uuid");
 
-async function run() {
-  await sock.connect("tcp://server:5555");
-  const name = "bot-" + Math.floor(Math.random()*10000);
-  const msg = {
-    service: "login",
-    data: {
-      user: name,
-      timestamp: Math.floor(Date.now()/1000)
-    }
-  };
-  await sock.send(JSON.stringify(msg));
-  const [reply] = await sock.receive();
-  console.log("bot login reply:", name, reply.toString());
-  // bot stays up; for part1 it does nothing else
-  setInterval(()=>{}, 1000);
+// Função para gerar UUID manualmente
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
-run().catch(err => console.error(err));
+async function main() {
+    const sock = new zmq.Push();
+    await sock.connect("tcp://server:5556");
+
+    console.log("Bot conectado ao servidor...");
+
+    setInterval(async () => {
+        let msg = {
+            id: uuidv4(),
+            timestamp: Date.now(),
+            type: "log",
+            message: "Olá do bot!"
+        };
+        await sock.send(JSON.stringify(msg));
+        console.log("Mensagem enviada:", msg);
+    }, 3000);
+}
+
+main();
