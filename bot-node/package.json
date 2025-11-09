@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "bot.js",
   "dependencies": {
+    "uuid": "^13.0.0",
     "zeromq": "^6.0.0"
   }
 }

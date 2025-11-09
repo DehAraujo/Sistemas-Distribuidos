@@ -1,12 +1,11 @@
 FROM node:18-alpine
 WORKDIR /app
 
-# Copia os arquivos de dependência
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
-# Instala as dependências de Node.js (isto deve ser reexecutado)
+# instalar uuid
 RUN npm install
 
-# Copia o restante do código
-COPY . .
+COPY bot.js .
+
 CMD ["node", "bot.js"]
