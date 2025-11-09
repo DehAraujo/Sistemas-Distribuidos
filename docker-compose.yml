@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  server:
+    build: ./server-python
+    container_name: server
+    volumes:
+      - ./server-python/data:/app/data
+    ports:
+      - "5555:5555"
+  client:
+    build: ./client-go
+    container_name: client
+    depends_on:
+      - server
+    # override command to allow running with arg:
+    command: ["./client", "alice"]
+  bot:
+    build: ./bot-node
+    container_name: bot
+    depends_on:
+      - server
+    # use scale to run multiple replicas in later parts; for now 1 instance
