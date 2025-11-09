@@ -1,10 +1,10 @@
 version: "3.8"
 services:
   server:
-    build: ./server-python
+    build: ./server
     container_name: server
     volumes:
-      - ./server-python/data:/app/data
+      - ./server/data:/app/data
     ports:
       - "5555:5555"
   client:
