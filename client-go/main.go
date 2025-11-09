@@ -15,23 +15,26 @@ func sendRequest(req map[string]interface{}) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, fmt.Errorf("falha ao criar socket ZeroMQ: %w", err)
 	}
-	defer socket.Close() // Agora é seguro chamar Close, pois 'socket' não é nil se a criação for bem-sucedida
+	defer socket.Close() // Agora é seguro chamar Close, pois 'socket' não é nil
 
-	// 2. VERIFICAÇÃO DO ERRO DE CONEXÃO
-	_, err = socket.Connect("tcp://server:5555") // O Connect também retorna um erro!
-	if err != nil {
-		return nil, fmt.Errorf("falha ao conectar ZeroMQ em tcp://server:5555: %w", err)
-	}
+	// 2. CORREÇÃO DE ATRIBUIÇÃO: socket.Connect retorna apenas um int (resultado C)
+	// Se houver um erro, o zmq4.SendBytes ou RecvBytes o reportará.
+	socket.Connect("tcp://server:5555")
+	// ^ Removemos: _, err = socket.Connect(...)
 
 	b, _ := json.Marshal(req)
+
+	// O primeiro erro real de rede/conexão deve ser capturado aqui:
 	_, err = socket.SendBytes(b, 0)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("falha ao enviar dados: %w", err)
 	}
+
 	replyBytes, err := socket.RecvBytes(0)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("falha ao receber resposta: %w", err)
 	}
+
 	var reply map[string]interface{}
 	json.Unmarshal(replyBytes, &reply)
 	return reply, nil
